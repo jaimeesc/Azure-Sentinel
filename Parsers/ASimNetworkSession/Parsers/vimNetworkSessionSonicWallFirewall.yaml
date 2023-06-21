@@ -1,7 +1,7 @@
 Parser:
   Title: Network Session ASIM filtering parser for SonicWall firewalls
   Version: '0.1'
-  LastUpdated: June 2, 2023
+  LastUpdated: June 21, 2023
 Product:
   Name: SonicWall
 Normalization:
@@ -208,7 +208,9 @@ ParserQuery: |
                                                 )
     // Creating a consistent set of columns that can be used later in the query and removed from view at the end.
     | extend
-        FieldDeviceCustomNumber1Label = column_ifexists("FieldDeviceCustomNumber1Label", "") // FieldDeviceCustomNumberXLabel (cnXLabel=)
+        EventProduct = "SonicOS"
+      , EventVendor = DeviceVendor
+      , FieldDeviceCustomNumber1Label = column_ifexists("FieldDeviceCustomNumber1Label", "") // FieldDeviceCustomNumberXLabel (cnXLabel=)
       , FieldDeviceCustomNumber2Label = column_ifexists("FieldDeviceCustomNumber2Label", "") // FieldDeviceCustomNumberXLabel (cnXLabel=)
       , DeviceCustomNumber1Label = column_ifexists("DeviceCustomNumber1Label", "") // DeviceCustomNumberXLabel (cnXLabel=)
       , DeviceCustomNumber2Label = column_ifexists("DeviceCustomNumber2Label", "") // DeviceCustomNumberXLabel (cnXLabel=)
@@ -307,6 +309,7 @@ ParserQuery: |
       , DeviceModel
       , SerialNumber
       , FirmwareVersion
+      , EventProduct
       , LogMsgID
       , LogMsgCategory
       , LegacyMessageCategory

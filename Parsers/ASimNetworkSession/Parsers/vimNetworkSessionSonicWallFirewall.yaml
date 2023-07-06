@@ -1,7 +1,7 @@
 Parser:
   Title: Network Session ASIM filtering parser for SonicWall firewalls
   Version: '0.1'
-  LastUpdated: June 28, 2023
+  LastUpdated: June 30, 2023
 Product:
   Name: SonicWall
 Normalization:
@@ -66,6 +66,7 @@ ParserQuery: |
   | where (isnull(starttime) or TimeGenerated >= starttime) and (isnull(endtime) or TimeGenerated <= endtime)
   | where not(disabled)
   | where DeviceVendor == "SonicWall"
+  | where ( isnotempty(SourceIP) or isnotempty(DestinationIP) )
   | where (isnull(dstportnumber) or DestinationPort == dstportnumber) and (array_length(hostname_has_any) == 0)
   | extend
       temp_SrcMatch=has_any_ipv4_prefix(SourceIP, src_or_any)
@@ -164,8 +165,10 @@ ParserQuery: |
                                                 gcat == 13, "SSL VPN (13)",
                                                 gcat == 14, "Anti-Spam (14)",
                                                 gcat == 15, "WAN Acceleration (15)",
-                                                gcat == 16, "SD-WAN (16)",
-                                                gcat == 17, "Multi-Tenancy (17)",
+                                                gcat == 16, "Object (16)",
+                                                gcat == 17, "SD-WAN (17)",
+                                                gcat == 18, "Multi-Instance (18)",
+                                                gcat == 19, "Unified Policy Engine (19)",
                                                 "Log Category Not Mapped"
                                                 )
   // Handle mapping of the legacy category if one is assigned.
@@ -192,6 +195,7 @@ ParserQuery: |
                                               DeviceEventCategory == 1048576, "Expanded - VoIP Activity (1048576)",
                                               DeviceEventCategory == 2097152, "Expanded - WLAN IDS Activity (2097152)",
                                               DeviceEventCategory == 4194304, "Expanded - SonicPoint Activity (4194304)",
+                                              DeviceEventCategory == 8388608, "Expanded - Unified Policy Engine (8388608)",
                                               "Legacy Category Not Mapped"
                                               )
   // This adds a column for the IPS Priority level, using case() to map the ingested int value to a friendly string.

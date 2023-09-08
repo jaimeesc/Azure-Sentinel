@@ -8,7 +8,7 @@
   ],
   "Metadata": "SolutionMetadata.json",
   "BasePath": "C:\\Sentinel-Repos\\19.05.22\\Azure-Sentinel\\Solutions\\SonicWall Firewall",
-  "Version": "2.0.6",
+  "Version": "2.0.7",
   "TemplateSpec": true,
   "Is1PConnector": false
 }

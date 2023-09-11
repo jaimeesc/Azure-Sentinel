@@ -13,7 +13,8 @@ on:
   push:
     branches: [ development ]
     paths:
-    - '**'
+    - 'Solutions/SonicWall Firewall/**'
+    - 'Parsers/ASimNetworkSession/'
     - '!.github/workflows/**'  # this filter prevents other workflow changes from triggering this workflow
     - '.github/workflows/sentinel-deploy-3f648323-24b3-43be-8993-94d310832b49.yml'
 

@@ -14,7 +14,15 @@ on:
     branches: [ development ]
     paths:
     - 'Solutions/SonicWall Firewall/**'
-    - 'Parsers/ASimNetworkSession/'
+    - 'Parsers/ASimNetworkSession/ARM/ASimNetworkSessionSonicWallFirewall/**' 
+    - 'Parsers/ASimNetworkSession/ARM/vimNetworkSessionSonicWallFirewall/**'
+    - 'Parsers/ASimNetworkSession/Parsers/ASimNetworkSessionSonicWallFirewall.yaml'
+    - 'Parsers/ASimNetworkSession/Parsers/vimNetworkSessionSonicWallFirewall.yaml'
+    - 'Parsers/ASimNetworkSession/ASimNetworkSessionV1/ARM/ASimNetworkSessionSonicWallFirewall/**'
+    - 'Parsers/ASimNetworkSession/ASimNetworkSessionV1/ProductParsers/NetworkSessionSonicWallFirewall.yaml'
+    - 'Parsers/ASimWebSession/ARM/ASimWebSessionSonicWallFirewall/**'
+    - 'Parsers/ASimWebSession/ARM/vimWebSessionSonicWallFirewall/**'
+    - 'Parsers/ASimWebSession/Parsers/ASimWebSessionSonicWallFirewall.yaml'
     - '!.github/workflows/**'  # this filter prevents other workflow changes from triggering this workflow
     - '.github/workflows/sentinel-deploy-3f648323-24b3-43be-8993-94d310832b49.yml'
 

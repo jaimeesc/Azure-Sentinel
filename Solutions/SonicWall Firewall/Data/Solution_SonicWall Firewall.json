@@ -6,6 +6,19 @@
   "Data Connectors": [
     "Data Connectors/SonicwallFirewall.JSON"
   ],
+  "Workbooks": [
+	"Workbooks/SonicWallFirewall.json"
+  ],
+  "Analytic Rules": [
+    "Analytic Rules/CaptureATPMaliciousFileDetection.yaml"
+  ],
+  "Hunting Queries": [
+    "Hunting Queries/AbnormallyLargeJPEGFileDownloadedfromNewSource.yaml",
+    "Hunting Queries/OutboundSSHConnections.yaml"
+  ],
+  "Parsers": [
+    "Parsers/FullDeploymentSonicWallFirewallParsers.json"
+  ],
   "Metadata": "SolutionMetadata.json",
   "BasePath": "C:\\Sentinel-Repos\\19.05.22\\Azure-Sentinel\\Solutions\\SonicWall Firewall",
   "Version": "2.0.7",

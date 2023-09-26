@@ -21,7 +21,8 @@ query: |
   NetworkParserSonicWallFirewall
   | where SentBytes > 0 and ReceivedBytes > 0
   | where NetworkDirection == "Outbound"
-  | where ( DstPortNumber == 22 and NetworkProtocol in ("TCP", "UDP") ) or ServiceName contains "General SSH" or AppIDName == "SSH Protocol" or AppIDName == "Bitvise SSH"entityMappings:
+  | where ( DstPortNumber == 22 and NetworkProtocol in ("TCP", "UDP") ) or ServiceName contains "General SSH" or AppIDName == "SSH Protocol" or AppIDName == "Bitvise SSH"
+entityMappings:
   - entityType: IP
     fieldMappings:
       - identifier: Address

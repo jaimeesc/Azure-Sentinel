@@ -1,7 +1,7 @@
 Parser:
   Title: Network Session ASIM parser for SonicWall firewalls
   Version: '0.1'
-  LastUpdated: September 8, 2023
+  LastUpdated: October 13, 2023
 Product:
   Name: SonicWall
 Normalization:
@@ -36,6 +36,9 @@ ParserQuery: |
   CommonSecurityLog
   | where DeviceVendor == "SonicWall"
   | where ( isnotempty(SourceIP) or isnotempty(DestinationIP) )
+  | invoke _ASIM_ResolveDstFQDN("DestinationHostname")
+  | invoke _ASIM_ResolveSrcFQDN("SourceHostname")
+  | invoke _ASIM_ResolveDvcFQDN("")
   | parse-kv AdditionalExtensions as (['gcat']:string, ['snpt']:string, ['dnpt']:string, ['susr']:string,['appName']:string, ['appcat']:string, ['appid']:string, ['sid']:string, ['catid']:string, ['ipscat']:string, ['ipspri']:string, ['spycat']:string, ['spypri']:string, ['fw_action']:string, ['dpi']:string, ['bid']:string, ['af_action']:string, ['af_polid']:string, ['af_policy']:string, ['af_type']:string, ['af_service']:string, ['af_object']:string, ['contentObject']:string, ['fileid']:string) with (pair_delimiter=";", kv_delimiter="=")
   | extend RequestURL_ = extract(@"(?:[.*;]+?)(?P<url>[a-zA-Z0-9_*.,}{&%$~:;\-=\/?[:space:]]+)(?:;fw_action)", 1, AdditionalExtensions)
   | extend RequestURL_ = iif(RequestURL_ startswith "snpt" or RequestURL_ startswith "dnpt" or RequestURL_ startswith "appid" or RequestURL_ startswith "appName", extract(@"(?:\d;|.{1}\w.{1};)(?P<url>[a-zA-Z0-9_*.,}{&%$~:;\-=\/?[:space:]]+)", 1, RequestURL_), RequestURL_)
@@ -59,6 +62,12 @@ ParserQuery: |
                                               LogSeverity == 1, "Not Mapped (1)",
                                               "Not Mapped"
                                               )
+  | extend EventSeverity = case(tolong(LogSeverity) <= 4, "Informational",
+                                              tolong(LogSeverity) <= 6, "Low",
+                                              tolong(LogSeverity) <= 8, "Medium",
+                                              tolong(LogSeverity) > 8, "High",
+                                              ""
+                                              )
   | extend HttpRequestMethod = case(RequestMethod == 0, "No Operation (0)",
                                               RequestMethod == 1, "HTTP GET (1)",
                                               RequestMethod == 2, "HTTP POST (2)",
@@ -74,8 +83,6 @@ ParserQuery: |
     EventResourceId = _ResourceId
     , DstMacAddr = DestinationMACAddress
     , SrcMacAddr = SourceMACAddress
-    , DstHostname = DestinationHostName
-    , SrcHostname = SourceHostName
     , DeviceModel = DeviceProduct
     , FirmwareVersion = DeviceVersion
     , SerialNumber = Computer
@@ -248,6 +255,7 @@ ParserQuery: |
     , EventSchemaVersion = "0.2.6"
     , EventSchema = "NetworkSession"
     , EventCount = toint(1)
+    , EventUid = _ItemId
     , ThreatConfidence = toint(column_ifexists("ThreatConfidence", int(null)))
   | extend
       UrlCategory = CFSCategoryName

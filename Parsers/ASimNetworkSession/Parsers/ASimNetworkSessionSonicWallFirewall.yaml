@@ -1,7 +1,7 @@
 Parser:
   Title: Network Session ASIM parser for SonicWall firewalls
   Version: '0.1'
-  LastUpdated: October 13, 2023
+  LastUpdated: October 16, 2023
 Product:
   Name: SonicWall
 Normalization:
@@ -180,7 +180,10 @@ ParserQuery: |
     , EventVendor = DeviceVendor
     , DvcIdType = "Other"
     , Dvc = SerialNumber
+    , DvcIpAddr = SerialNumber
     , Hostname = DstHostname
+    , ASimMatchingHostname = "-"
+    , ASimMatchingIpAddr = "-"
     , FieldDeviceCustomNumber1Label = column_ifexists("FieldDeviceCustomNumber1Label", "") // FieldDeviceCustomNumberXLabel (cnXLabel=)
     , FieldDeviceCustomNumber2Label = column_ifexists("FieldDeviceCustomNumber2Label", "") // FieldDeviceCustomNumberXLabel (cnXLabel=)
     , DeviceCustomNumber1Label = column_ifexists("DeviceCustomNumber1Label", "") // DeviceCustomNumberXLabel (cnXLabel=)
@@ -256,6 +259,7 @@ ParserQuery: |
     , EventSchema = "NetworkSession"
     , EventCount = toint(1)
     , EventUid = _ItemId
+    , EventResultDetails = "NA"
     , ThreatConfidence = toint(column_ifexists("ThreatConfidence", int(null)))
   | extend
       UrlCategory = CFSCategoryName

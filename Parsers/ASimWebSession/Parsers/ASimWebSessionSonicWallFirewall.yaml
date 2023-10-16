@@ -1,7 +1,7 @@
 Parser:
   Title: Web Session ASIM parser for SonicWall firewalls
   Version: '0.1'
-  LastUpdated: October 13, 2023
+  LastUpdated: October 16, 2023
 Product:
   Name: SonicWall
 Normalization:
@@ -255,11 +255,15 @@ ParserQuery: |
       , EventSchema = "WebSession"
       , EventCount = toint(1)
       , EventUid = _ItemId
+      , EventResultDetails = "NA"
       , Hostname = DstHostname
+      , ASimMatchingHostname = "-"
+      , ASimMatchingIpAddr = "-"
       , UserAgent = HttpUserAgent
   | extend
       UrlCategory = CFSCategoryName
       , HttpRequestMethod = coalesce(HttpRequestMethod, HttpRequestMethod_)
+      , HttpStatusCode = EventResultDetails
       , SrcUsername = coalesce(susr, SrcUsername)
       , FileName = coalesce(FileName, AppControlFileName)
       , NetworkDirection = case(SrcZone == "" and DstZone == "", "NA"

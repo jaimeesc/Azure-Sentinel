@@ -306,11 +306,13 @@ ParserQuery: |
       , EventSchema = "WebSession"
       , EventCount = toint(1)
       , EventUid = _ItemId
+      , EventResultDetails = "NA"
       , Hostname = DstHostname
       , UserAgent = HttpUserAgent
   | extend
       UrlCategory = CFSCategoryName
       , HttpRequestMethod = coalesce(HttpRequestMethod, HttpRequestMethod_)
+      , HttpStatusCode = EventResultDetails
       , SrcUsername = coalesce(susr, SrcUsername)
       , FileName = coalesce(FileName, AppControlFileName)
       , NetworkDirection = case(SrcZone == "" and DstZone == "", "NA"

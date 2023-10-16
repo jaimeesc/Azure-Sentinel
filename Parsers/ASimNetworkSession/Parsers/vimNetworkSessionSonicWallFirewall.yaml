@@ -1,7 +1,7 @@
 Parser:
   Title: Network Session ASIM filtering parser for SonicWall firewalls
   Version: '0.1'
-  LastUpdated: October 13, 2023
+  LastUpdated: October 16, 2023
 Product:
   Name: SonicWall
 Normalization:
@@ -79,11 +79,16 @@ ParserQuery: |
                                 temp_DstMatch, "DstIpAddr",
                                 "No match"
                             )
-    | where ASimMatchingIpAddr != "No match" 
-    | project-away temp_*
+  | where ASimMatchingIpAddr != "No match" 
+  | project-away temp_*
   | invoke _ASIM_ResolveDstFQDN("DestinationHostname")
   | invoke _ASIM_ResolveSrcFQDN("SourceHostname")
   | invoke _ASIM_ResolveDvcFQDN("")
+  | extend ASimMatchingHostname = case(
+                                    array_length(hostname_has_any) == 0 , "-",
+                                    DstHostname has_any (hostname_has_any), "DestinationHostname",
+                                    "No match"
+                                    )
   | parse-kv AdditionalExtensions as (['gcat']:string, ['snpt']:string, ['dnpt']:string, ['susr']:string,['appName']:string, ['appcat']:string, ['appid']:string, ['sid']:string, ['catid']:string, ['ipscat']:string, ['ipspri']:string, ['spycat']:string, ['spypri']:string, ['fw_action']:string, ['dpi']:string, ['bid']:string, ['af_action']:string, ['af_polid']:string, ['af_policy']:string, ['af_type']:string, ['af_service']:string, ['af_object']:string, ['contentObject']:string, ['fileid']:string) with (pair_delimiter=";", kv_delimiter="=")
   | extend RequestURL_ = extract(@"(?:[.*;]+?)(?P<url>[a-zA-Z0-9_*.,}{&%$~:;\-=\/?[:space:]]+)(?:;fw_action)", 1, AdditionalExtensions)
   | extend RequestURL_ = iif(RequestURL_ startswith "snpt" or RequestURL_ startswith "dnpt" or RequestURL_ startswith "appid" or RequestURL_ startswith "appName", extract(@"(?:\d;|.{1}\w.{1};)(?P<url>[a-zA-Z0-9_*.,}{&%$~:;\-=\/?[:space:]]+)", 1, RequestURL_), RequestURL_)
@@ -228,6 +233,7 @@ ParserQuery: |
     , EventVendor = DeviceVendor
     , DvcIdType = "Other"
     , Dvc = SerialNumber
+    , DvcIpAddr = SerialNumber
     , Hostname = DstHostname
     , FieldDeviceCustomNumber1Label = column_ifexists("FieldDeviceCustomNumber1Label", "") // FieldDeviceCustomNumberXLabel (cnXLabel=)
     , FieldDeviceCustomNumber2Label = column_ifexists("FieldDeviceCustomNumber2Label", "") // FieldDeviceCustomNumberXLabel (cnXLabel=)
@@ -303,6 +309,7 @@ ParserQuery: |
     , EventSchema = "NetworkSession"
     , EventCount = toint(1)
     , EventUid = _ItemId
+    , EventResultDetails = "NA"
     , ThreatConfidence = toint(column_ifexists("ThreatConfidence", int(null)))
   | extend
       UrlCategory = CFSCategoryName

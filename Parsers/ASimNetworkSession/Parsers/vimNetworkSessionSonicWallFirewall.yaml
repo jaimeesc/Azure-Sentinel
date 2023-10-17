@@ -302,8 +302,8 @@ ParserQuery: |
     , newValue = column_ifexists("newValue", "") // The new value associated with the auditing event.
     , auditTime = column_ifexists("auditTime", "") // The timestamp indicates the time configuration was changed.
     , auditPath = column_ifexists("auditPath", "") // The logical location of the configuration setting.
-    , EventStartTime = coalesce(todatetime(StartTime), datetime(null))
-    , EventEndTime = coalesce(todatetime(EndTime), datetime(null))
+    , EventStartTime = coalesce(todatetime(StartTime), TimeGenerated)
+    , EventEndTime = coalesce(todatetime(EndTime), TimeGenerated)
     , EventType = "NetworkSession"
     , EventSchemaVersion = "0.2.6"
     , EventSchema = "NetworkSession"

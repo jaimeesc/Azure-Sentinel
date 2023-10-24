@@ -34,6 +34,7 @@ ParserQuery: |
   , "drop ICMP", "Drop ICMP"];
   let Parser=(disabled:bool=false){
   CommonSecurityLog
+  | where not(disabled)
   | where DeviceVendor == "SonicWall"
   | where ( isnotempty(SourceIP) or isnotempty(DestinationIP) )
   | invoke _ASIM_ResolveDstFQDN("DestinationHostname")

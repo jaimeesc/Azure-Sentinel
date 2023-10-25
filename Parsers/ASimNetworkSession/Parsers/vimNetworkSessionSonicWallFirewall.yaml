@@ -270,7 +270,7 @@ ParserQuery: |
     , CaptureATPVerdict = extract(@'Gateway Anti-Virus Status: (.*)\. ', 1, column_ifexists("Message", "")) // Capture ATP Verdict from the Message.
     , Country = extract(@'Country Name:(.*)\"$', 1, column_ifexists("Message", ""))
     , arg = column_ifexists("arg", "") // URL. Represents the URL path name.
-    , FileIdentifier = column_ifexists("fileid", "") // File hash or URL.
+    , fileid = column_ifexists("fileid", "") // File hash or URL.
     , uuid = column_ifexists("uuid", "") // UUID
     , dpi = column_ifexists("dpi", "") // Indicates a flow was inspected by DPI. Applies only to Connection Closed messages.
     , dpt = column_ifexists("dpt", "") // Destination port
@@ -369,6 +369,7 @@ ParserQuery: |
     , IPSCategoryName = ipscat // IPS Category Name
     , AntiSpywareCategory = spycat // Anti-Spyware Category
     , URLPathName = arg // URL. Represents the URL path name.
+    , FileIdentifier = fileid // File hash or URL
     , DPIInspectedFlow = dpi // Indicates a flow was inspected by DPI. Applies only to Connection Closed messages.
     , DestinationPortDPT = dpt // Destination port
     , NATDestinationPort = dnpt // NAT'ed destination port

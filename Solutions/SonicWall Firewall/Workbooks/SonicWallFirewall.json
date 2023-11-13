@@ -207,7 +207,7 @@
             "type": 3,
             "content": {
               "version": "KqlItem/1.0",
-              "query": "// Failed CLI login attempts\r\nASimNetworkSessionSonicWallFirewall\r\n| where LogMsgID == 200\r\n| where \"{SourceDevice:lable}\" == \"All\" or Dvc in ({SourceDevice})\r\n| project-rename User = SrcUsername\r\n| extend HitCounter = 1 // Assigns a count to each record\r\n| summarize Users = makeset(trim('\"', User)), Count = sum(HitCounter) by SourceIP\r\n| project SourceIP, Count, UserCount = array_length(split(Users, \",\")), Users\r\n| sort by Count desc",
+              "query": "// Failed CLI login attempts\r\nASimNetworkSessionSonicWallFirewall\r\n| where LogMsgID == 200\r\n| where \"{SourceDevice:lable}\" == \"All\" or Dvc in ({SourceDevice})\r\n| extend HitCounter = 1 // Assigns a count to each record\r\n| summarize Users = makeset(trim('\"', SrcUsername)), Count = sum(HitCounter) by SourceIP\r\n| project SourceIP, Count, UserCount = array_length(split(Users, \",\")), Users\r\n| sort by Count desc",
               "size": 0,
               "showAnalytics": true,
               "title": "Failed CLI Login Attempts ({TimeRange})",
@@ -275,7 +275,7 @@
             "type": 3,
             "content": {
               "version": "KqlItem/1.0",
-              "query": "// Failed web login attempts\r\nASimNetworkSessionSonicWallFirewall\r\n| where LogMsgID in (30, 32, 33, 243, 245, 745, 1552, 1554)\r\n| where \"{SourceDevice:lable}\" == \"All\" or Dvc in ({SourceDevice})\r\n| project-rename User = SrcUsername\r\n| extend HitCounter = 1 // Assigns a count to each record\r\n| summarize Users = makeset(trim('\"', User)), Reasons = makeset(Activity), Count = sum(HitCounter) by SourceIP\r\n| project SourceIP, Count, UserCount = array_length(split(Users, \",\")), Reasons, Users\r\n| sort by Count desc",
+              "query": "// Failed web login attempts\r\nASimNetworkSessionSonicWallFirewall\r\n| where LogMsgID in (30, 32, 33, 243, 245, 745, 1552, 1554)\r\n| where \"{SourceDevice:lable}\" == \"All\" or Dvc in ({SourceDevice})\r\n| extend HitCounter = 1 // Assigns a count to each record\r\n| summarize Users = makeset(trim('\"', SrcUsername)), Reasons = makeset(Activity), Count = sum(HitCounter) by SourceIP\r\n| project SourceIP, Count, UserCount = array_length(split(Users, \",\")), Reasons, Users\r\n| sort by Count desc",
               "size": 0,
               "showAnalytics": true,
               "title": "Failed Web Login Attempts ({TimeRange})",
@@ -967,10 +967,49 @@
             "name": "text - 3"
           },
           {
+            "type": 9,
+            "content": {
+              "version": "KqlParameterItem/1.0",
+              "parameters": [
+                {
+                  "id": "b7c2d4df-007d-433e-8695-352fc0a8284f",
+                  "version": "KqlParameterItem/1.0",
+                  "name": "CFSCategory",
+                  "label": "CFS Category",
+                  "type": 2,
+                  "multiSelect": true,
+                  "quote": "'",
+                  "delimiter": ",",
+                  "query": "ASimWebSessionSonicWallFirewall(false)\r\n| where isnotempty(CFSCategoryID)\r\n| summarize by CFSCategoryID, CFSCategoryName\r\n| sort by CFSCategoryName asc\r\n| project value = CFSCategoryID, label = coalesce(trim('\"', CFSCategoryName), \"N/A\")",
+                  "typeSettings": {
+                    "additionalResourceOptions": [
+                      "value::all"
+                    ],
+                    "showDefault": false
+                  },
+                  "timeContext": {
+                    "durationMs": 0
+                  },
+                  "timeContextFromParameter": "TimeRange",
+                  "defaultValue": "value::all",
+                  "queryType": 0,
+                  "resourceType": "microsoft.operationalinsights/workspaces",
+                  "value": [
+                    "value::all"
+                  ]
+                }
+              ],
+              "style": "pills",
+              "queryType": 0,
+              "resourceType": "microsoft.operationalinsights/workspaces"
+            },
+            "name": "parameters - 5"
+          },
+          {
             "type": 3,
             "content": {
               "version": "KqlItem/1.0",
-              "query": "// Top 50 CFS Domains Blocked with blocked Usernames and CFS Policies\r\nASimNetworkSessionSonicWallFirewall\r\n| where \"{SourceDevice:lable}\" == \"All\" or Dvc in ({SourceDevice})\r\n| where \"{Source_IP:lable}\" == \"All\" or SourceIP in ({Source_IP})\r\n| where Activity == \"Website Blocked\"\r\n| extend URL = trim(@\"(/.*)\", coalesce(RequestURL, RequestURL_))\r\n| extend HitCounter = 1\r\n| summarize Users = makeset(trim('\"', SrcUsername)), Policies = makeset(trim('\"', CFSPolicyName)), Count = sum(HitCounter) by URL, Category = CFSCategoryName\r\n| top 50 by Count desc\r\n",
+              "query": "// Top 50 CFS Domains Blocked with blocked Usernames and CFS Policies\r\nASimNetworkSessionSonicWallFirewall\r\n| where \"{SourceDevice:lable}\" == \"All\" or Dvc in ({SourceDevice})\r\n| where \"{Source_IP:lable}\" == \"All\" or SourceIP in ({Source_IP})\r\n| where \"{CFSCategory:lable}\" == \"All\" or CFSCategoryID in ({CFSCategory:value})\r\n| where Activity == \"Website Blocked\"\r\n| extend URL = trim(@\"(/.*)\", coalesce(RequestURL, RequestURL_))\r\n| extend HitCounter = 1\r\n| summarize Users = makeset(trim('\"', SrcUsername)), Policies = makeset(trim('\"', CFSPolicyName)), Count = sum(HitCounter) by URL, Category = CFSCategoryName\r\n| top 50 by Count desc\r\n",
               "size": 0,
               "showAnalytics": true,
               "title": "Top 50 CFS Domains Blocked ({TimeRange})",
@@ -1070,7 +1109,7 @@
           {
             "type": 1,
             "content": {
-              "json": "A window into denied inbound/outbound traffic by country. Use the filters at the top of the workbook to adjust time ranges and more.\r\n\r\n**Country data is based on static watchlist data and is not an accurate representation of the live SonicWall Geo-IP database.**",
+              "json": "A window into denied inbound/outbound traffic by country. Use the filters at the top of the workbook to adjust time ranges and more.\r\n\r\n**Country data is available from SonicOS log message IDs 1199 and 1198.**",
               "style": "info"
             },
             "name": "text - 8"
@@ -1079,8 +1118,7 @@
             "type": 3,
             "content": {
               "version": "KqlItem/1.0",
-              "query": "let geodb = _GetWatchlist('geodb');\r\nASimNetworkSessionSonicWallFirewall\r\n| where \"{SourceDevice:lable}\" == \"All\" or Dvc in ({SourceDevice})\r\n| where \"{Source_IP:lable}\" == \"All\" or SourceIP in ({Source_IP})\r\n| where \"{Destination_IP:lable}\" == \"All\" or DestinationIP in ({Destination_IP})\r\n| where SourceZone == \"WAN\" and EventResult == \"Failure\"\r\n| evaluate ipv4_lookup(geodb, SourceIP, network, return_unmatched = true)\r\n| summarize DeniedCount = count(), TotalBytesReceived = sum(ReceivedBytes) by Country = coalesce(country_name, \"#N/A\")\r\n| order by DeniedCount desc",
-              "showQuery": true,
+              "query": "ASimNetworkSessionSonicWallFirewall\r\n| where \"{SourceDevice:lable}\" == \"All\" or Dvc in ({SourceDevice})\r\n| where \"{Source_IP:lable}\" == \"All\" or SourceIP in ({Source_IP})\r\n| where \"{Destination_IP:lable}\" == \"All\" or DestinationIP in ({Destination_IP})\r\n| where SourceZone == \"WAN\" and EventResult == \"Failure\"\r\n| where LogMsgID in (1199, 1198)\r\n| summarize DeniedCount = count(), TotalBytesReceived = sum(ReceivedBytes) by Country = coalesce(Country, \"#N/A\")\r\n| order by DeniedCount desc",
               "size": 0,
               "showAnalytics": true,
               "title": "Denied Inbound Traffic by Country ({TimeRange})",
@@ -1141,8 +1179,7 @@
             "type": 3,
             "content": {
               "version": "KqlItem/1.0",
-              "query": "let geodb = _GetWatchlist('geodb');\r\nASimNetworkSessionSonicWallFirewall\r\n// Look for dropped inbound traffic\r\n| where \"{SourceDevice:lable}\" == \"All\" or Dvc in ({SourceDevice})\r\n| where \"{Source_IP:lable}\" == \"All\" or SourceIP in ({Source_IP})\r\n| where \"{Destination_IP:lable}\" == \"All\" or DestinationIP in ({Destination_IP})\r\n| where SourceZone == \"WAN\" and EventResult == \"Failure\"\r\n// Use the watchlist to get the geolocation information.\r\n| evaluate ipv4_lookup(geodb, SourceIP, network, return_unmatched = true)\r\n// Summarize the data by number of messages and the sum of the received bytes.\r\n| summarize DeniedCount = count(), TotalBytesReceived = sum(ReceivedBytes) by Country = coalesce(country_name, \"#N/A\")\r\n| top 10 by DeniedCount desc",
-              "showQuery": true,
+              "query": "ASimNetworkSessionSonicWallFirewall\r\n// Look for dropped inbound traffic\r\n| where \"{SourceDevice:lable}\" == \"All\" or Dvc in ({SourceDevice})\r\n| where \"{Source_IP:lable}\" == \"All\" or SourceIP in ({Source_IP})\r\n| where \"{Destination_IP:lable}\" == \"All\" or DestinationIP in ({Destination_IP})\r\n| where SourceZone == \"WAN\" and EventResult == \"Failure\"\r\n| where LogMsgID in (1199, 1198)\r\n// Summarize the data by number of messages and the sum of the received bytes.\r\n| summarize DeniedCount = count(), TotalBytesReceived = sum(ReceivedBytes) by Country = coalesce(Country, \"#N/A\")\r\n| top 10 by DeniedCount desc",
               "size": 0,
               "showAnalytics": true,
               "title": "Top 10 Denied Inbound Traffic by Country ({TimeRange})",
@@ -1203,8 +1240,7 @@
             "type": 3,
             "content": {
               "version": "KqlItem/1.0",
-              "query": "let geodb = _GetWatchlist('geodb');\r\nASimNetworkSessionSonicWallFirewall\r\n| where \"{SourceDevice:lable}\" == \"All\" or Dvc in ({SourceDevice})\r\n| where \"{Source_IP:lable}\" == \"All\" or SourceIP in ({Source_IP})\r\n| where \"{Destination_IP:lable}\" == \"All\" or DestinationIP in ({Destination_IP})\r\n// Look for dropped inbound traffic\r\n| where SourceZone == \"WAN\" and EventResult == \"Failure\"\r\n// Use the watchlist to get the geolocation information.\r\n| evaluate ipv4_lookup(geodb, SourceIP, network, return_unmatched = true)\r\n// Summarize the data by number of messages and the sum of the received bytes.\r\n| summarize Events = makeset(Activity), DeniedCount = count(), TotalBytesReceived = sum(ReceivedBytes) by Country = coalesce(country_name, \"#N/A\"), Protocol = NetworkProtocol, DstPort = DstPortNumber, SourceIP\r\n| order by DeniedCount desc\r\n//TotalDeniedCount = sum(DeniedCount)\r\n\r\n",
-              "showQuery": true,
+              "query": "ASimNetworkSessionSonicWallFirewall\r\n| where \"{SourceDevice:lable}\" == \"All\" or Dvc in ({SourceDevice})\r\n| where \"{Source_IP:lable}\" == \"All\" or SourceIP in ({Source_IP})\r\n| where \"{Destination_IP:lable}\" == \"All\" or DestinationIP in ({Destination_IP})\r\n// Look for dropped inbound traffic\r\n| where SourceZone == \"WAN\" and EventResult == \"Failure\"\r\n| where LogMsgID in (1199, 1198)\r\n// Summarize the data by number of messages and the sum of the received bytes.\r\n| summarize Events = makeset(Activity), DeniedCount = count(), TotalBytesReceived = sum(ReceivedBytes) by Country = coalesce(Country, \"#N/A\"), Protocol = NetworkProtocol, DstPort = DstPortNumber, SourceIP\r\n| order by DeniedCount desc\r\n//TotalDeniedCount = sum(DeniedCount)\r\n\r\n",
               "size": 0,
               "showAnalytics": true,
               "title": "Denied Inbound Traffic Detail by Country ({TimeRange})",
@@ -1293,8 +1329,7 @@
             "type": 3,
             "content": {
               "version": "KqlItem/1.0",
-              "query": "// Denied outbound traffic by country\r\nlet geodb = _GetWatchlist('geodb');\r\nASimNetworkSessionSonicWallFirewall\r\n| where \"{SourceDevice:lable}\" == \"All\" or Dvc in ({SourceDevice})\r\n| where \"{Source_IP:lable}\" == \"All\" or SourceIP in ({Source_IP})\r\n| where \"{Destination_IP:lable}\" == \"All\" or DestinationIP in ({Destination_IP})\r\n// Look for dropped outbound traffic traffic\r\n| where DestinationZone == \"WAN\" and SourceZone != \"WAN\" and EventResult == \"Failure\"\r\n// Use the watchlist to get the geolocation information.\r\n| evaluate ipv4_lookup(geodb, DestinationIP, network, return_unmatched = true)\r\n// Summarize the data by number of messages\r\n| summarize Events = makeset(Activity), DeniedCount = count() by Country = coalesce(country_name, \"#N/A\"), Protocol = NetworkProtocol, DstPort = DstPortNumber, DestinationIP\r\n| order by DeniedCount desc",
-              "showQuery": true,
+              "query": "// Denied outbound traffic by country\r\nASimNetworkSessionSonicWallFirewall\r\n| where \"{SourceDevice:lable}\" == \"All\" or Dvc in ({SourceDevice})\r\n| where \"{Source_IP:lable}\" == \"All\" or SourceIP in ({Source_IP})\r\n| where \"{Destination_IP:lable}\" == \"All\" or DestinationIP in ({Destination_IP})\r\n// Look for dropped outbound traffic traffic\r\n| where DestinationZone == \"WAN\" and SourceZone != \"WAN\" and EventResult == \"Failure\"\r\n| where LogMsgID in (1199, 1198)\r\n// Summarize the data by number of messages\r\n| summarize Events = makeset(Activity), DeniedCount = count() by Country = coalesce(Country, \"#N/A\"), Protocol = NetworkProtocol, DstPort = DstPortNumber, DestinationIP\r\n| order by DeniedCount desc",
               "size": 0,
               "showAnalytics": true,
               "title": "Denied Outbound Traffic Detail by Country ({TimeRange})",
@@ -1376,8 +1411,7 @@
             "type": 3,
             "content": {
               "version": "KqlItem/1.0",
-              "query": "// Denied outbound traffic by country\r\nlet geodb = _GetWatchlist('geodb');\r\nASimNetworkSessionSonicWallFirewall\r\n| where \"{SourceDevice:lable}\" == \"All\" or Dvc in ({SourceDevice})\r\n| where \"{Source_IP:lable}\" == \"All\" or SourceIP in ({Source_IP})\r\n| where \"{Destination_IP:lable}\" == \"All\" or DestinationIP in ({Destination_IP})\r\n// Look for dropped outbound traffic traffic\r\n| where DestinationZone == \"WAN\" and SourceZone != \"WAN\" and EventResult == \"Failure\"\r\n// Use the watchlist to get the geolocation information.\r\n| evaluate ipv4_lookup(geodb, DestinationIP, network, return_unmatched = true)\r\n// Summarize the data by number of messages\r\n| summarize DeniedCount = count() by Country = coalesce(country_name, \"#N/A\")\r\n| order by DeniedCount desc",
-              "showQuery": true,
+              "query": "// Denied outbound traffic by country\r\nASimNetworkSessionSonicWallFirewall\r\n| where \"{SourceDevice:lable}\" == \"All\" or Dvc in ({SourceDevice})\r\n| where \"{Source_IP:lable}\" == \"All\" or SourceIP in ({Source_IP})\r\n| where \"{Destination_IP:lable}\" == \"All\" or DestinationIP in ({Destination_IP})\r\n// Look for dropped outbound traffic traffic\r\n| where DestinationZone == \"WAN\" and SourceZone != \"WAN\" and EventResult == \"Failure\"\r\n| where LogMsgID in (1199, 1198)\r\n// Summarize the data by number of messages\r\n| summarize DeniedCount = count() by Country = coalesce(Country, \"#N/A\")\r\n| order by DeniedCount desc",
               "size": 0,
               "showAnalytics": true,
               "title": "Denied Outbound Traffic by Country ({TimeRange})",
@@ -1959,7 +1993,6 @@
               "groupType": "editable",
               "title": "Anti-Spyware",
               "expandable": true,
-              "expanded": true,
               "items": [
                 {
                   "type": 3,
@@ -2015,7 +2048,6 @@
               "groupType": "editable",
               "title": "Gateway Anti-Virus",
               "expandable": true,
-              "expanded": true,
               "items": [
                 {
                   "type": 3,
@@ -2075,7 +2107,6 @@
               "groupType": "editable",
               "title": "Capture ATP Insights",
               "expandable": true,
-              "expanded": true,
               "items": [
                 {
                   "type": 9,
@@ -2119,7 +2150,7 @@
                   "type": 3,
                   "content": {
                     "version": "KqlItem/1.0",
-                    "query": "ASimNetworkSessionSonicWallFirewall\r\n| where LogMsgID in (1631, 1460) and isnotempty(CaptureATPVerdict)\r\n| where \"{Capture_ATP_Verdict:lable}\" == \"All\" or CaptureATPVerdict in ({Capture_ATP_Verdict:value})\r\n| where \"{SourceDevice:lable}\" == \"All\" or Dvc in ({SourceDevice})\r\n| project Time = TimeGenerated, Dvc, User = SrcUsername, Protocol, Verdict = CaptureATPVerdict,\r\nURL = coalesce(RequestURL, RequestURL_), File = coalesce(split(RequestURL, '/')[-1], split(RequestURL_, '/')[-1]), Hash = fileid\r\n| sort by Time desc",
+                    "query": "ASimNetworkSessionSonicWallFirewall\r\n| where LogMsgID in (1631, 1460) and isnotempty(CaptureATPVerdict)\r\n| where \"{Capture_ATP_Verdict:lable}\" == \"All\" or CaptureATPVerdict in ({Capture_ATP_Verdict:value})\r\n| where \"{SourceDevice:lable}\" == \"All\" or Dvc in ({SourceDevice})\r\n| project Time = TimeGenerated, Dvc, User = SrcUsername, Protocol, Verdict = CaptureATPVerdict,\r\nURL = coalesce(RequestURL, RequestURL_), File = coalesce(split(RequestURL, '/')[-1], split(RequestURL_, '/')[-1]), Hash = FileIdentifier\r\n| sort by Time desc",
                     "size": 0,
                     "showAnalytics": true,
                     "title": "Verdicts from Capture ATP",
@@ -2925,6 +2956,9 @@
       }
     }
   ],
-  "fromTemplateId": "sentinel-SonicWallFirewallWorkbook",
+  "fallbackResourceIds": [
+    "/subscriptions/5add9385-2d3f-4123-8a5a-439d0ea71da4/resourcegroups/sentinel-test/providers/microsoft.operationalinsights/workspaces/sentinel-test"
+  ],
+  "fromTemplateId": "sentinel-UserWorkbook",
   "$schema": "https://github.com/Microsoft/Application-Insights-Workbooks/blob/master/schema/workbook.json"
 }

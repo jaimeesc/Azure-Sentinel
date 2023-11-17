@@ -24,15 +24,16 @@ relevantTechniques:
 query: |
   ASimNetworkSessionSonicWallFirewall
   | where LogMsgID == 1631 and CaptureATPVerdict == "BAD"
-  | project DeviceModel
-  , SerialNumber
-  , SrcIpAddr
-  , SrcUsername
-  , Protocol
-  , RequestURL
-  , File = coalesce(split(RequestURL, '/')[-1], split(RequestURL_, '/')[-1])
-  , Hash = fileid
-  , Verdict = CaptureATPVerdict
+  | project
+      DeviceModel,
+      SerialNumber,
+      SrcIpAddr,
+      SrcUsername,
+      Protocol,
+      RequestURL,
+      File = coalesce(split(RequestURL, '/')[-1], split(RequestURL_, '/')[-1]),
+      Hash = FileIdentifier,
+      Verdict = CaptureATPVerdict
 entityMappings:
   - entityType: File
     fieldMappings:

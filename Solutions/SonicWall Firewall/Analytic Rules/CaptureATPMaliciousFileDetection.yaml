@@ -30,8 +30,8 @@ query: |
       SrcIpAddr,
       SrcUsername,
       Protocol,
-      RequestURL,
-      File = coalesce(split(RequestURL, '/')[-1], split(RequestURL_, '/')[-1]),
+      RequestURL = coalesce(RequestURL, RequestURL_),
+      File = url_decode(tostring(coalesce(split(RequestURL, '/')[-1], split(RequestURL_, '/')[-1]))),
       Hash = FileIdentifier,
       Verdict = CaptureATPVerdict
 entityMappings:

@@ -46,7 +46,12 @@ relevantTechniques:
 query: |
   ASimNetworkSessionSonicWallFirewall(false)
   | where NetworkDirection == "Inbound" and EventResult in ("NA", "Success")
-  | where AppIDName == "Windows Remote Desktop Services" or AppIDName == "Telnet" or AppIDName == "SSH Protocol" or AppIDName == "Bitvise SSH" or DstPortNumber in (22, 23, 3389)
+  | where LogMsgID != 1370
+  | where AppIDName == "Windows Remote Desktop Services"
+      or AppIDName == "Telnet"
+      or (AppIDName == "SSH Protocol" and AppSignatureID != 446)
+      or AppIDName == "Bitvise SSH"
+      or DstPortNumber in (22, 23, 3389)
 entityMappings:
   - entityType: IP
     fieldMappings:

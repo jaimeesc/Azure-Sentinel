@@ -13,7 +13,7 @@ References:
   - Title: ASIM
     Link: https://aka.ms/AboutASIM
 Description: |
-  This ASIM parser supports normalizing SonicWall SonicOS ArcSight-formatted Syslog data ingested by Microsoft Sentinel into CommonSecurityLogs to the ASIM Network Session normalized schema.
+  This ASIM parser supports normalizing SonicWall SonicOS ArcSight-formatted Syslog data ingested by Microsoft Sentinel into the CommonSecurityLog table to the ASIM Network Session normalized schema.
 ParserName: ASimNetworkSessionSonicWallFirewall
 EquivalentBuiltInParser: _ASim_NetworkSession_SonicWallFirewall
 ParserParams:

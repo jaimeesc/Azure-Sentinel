@@ -1,5 +1,5 @@
 ﻿Result
-"(0) Error: 1 invalid value(s) (up to 10 listed) in 1000 records (100.0%) for field [DvcIpAddr] of type [IP Address]: [""18C24135E8B6""] (Schema:NetworkSession)"
+"(0) Error: 1 invalid value(s) (up to 10 listed) in 1000 records (100.0%) for field [DvcIpAddr] of type [IP Address]: [""18C14135A8BA""] (Schema:NetworkSession)"
 "(0) Error: 1 invalid value(s) (up to 10 listed) in 1000 records (100.0%) for field [EventProduct] of type [Enumerated]: [""SonicOS""] (Schema:NetworkSession)"
 "(0) Error: 1 invalid value(s) (up to 10 listed) in 931 records (93.1%) for field [DvcAction] of type [Enumerated]: [""NA""] (Schema:NetworkSession)"
 "(0) Error: 2 invalid value(s) (up to 10 listed) in 2000 records (200.0%) for field [EventVendor] of type [Enumerated]: [""SonicWall""] (Schema:NetworkSession)"

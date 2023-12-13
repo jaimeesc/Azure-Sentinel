@@ -16,7 +16,7 @@
     },
     "workspace-location": {
       "type": "string",
-      "defaultValue": "",
+      "defaultValue": "[concat('Region to deploy solution resources -- separate from location selection',parameters('location'))]",
       "metadata": {
         "description": "[concat('Region to deploy solution resources -- separate from location selection',parameters('location'))]"
       }
@@ -25,15 +25,15 @@
       "defaultValue": "",
       "type": "string",
       "metadata": {
-        "description": "Workspace name for Log Analytics where Microsoft Sentinel is setup"
+        "description": "Workspace name for Log Analytics where Microsoft Sentinel is setup."
       }
     },
     "workbook1-name": {
       "type": "string",
-      "defaultValue": "SonicWall Workbook",
+      "defaultValue": "SonicWall Workbook 1",
       "minLength": 1,
       "metadata": {
-        "description": "Name for the workbook"
+        "description": "Name of the workbook to be deployed."
       }
     }
   },
@@ -79,17 +79,17 @@
       "_analyticRulecontentId1": "27f1a570-5f20-496b-88f6-a9aa2c5c9534",
       "analyticRuleId1": "[resourceId('Microsoft.SecurityInsights/AlertRuleTemplates', '27f1a570-5f20-496b-88f6-a9aa2c5c9534')]",
       "analyticRuleTemplateSpecName1": "[concat(parameters('workspace'),'/Microsoft.SecurityInsights/',concat(parameters('workspace'),'-ar-',uniquestring('27f1a570-5f20-496b-88f6-a9aa2c5c9534')))]",
-      "_analyticRulecontentProductId1": "[concat(take(variables('_solutionId'),50),'-','ar','-', uniqueString(concat(variables('_solutionId'),'-','AnalyticsRule','-','27f1a570-5f20-496b-88f6-a9aa2c5c9534','-', '1.0.0')))]",
-      "__analyticRulecontentProductId1": "[variables('_analyticRulecontentProductId1')]"
+      "_analyticRulecontentProductId1": "[concat(take(variables('_solutionId'),50),'-','ar','-', uniqueString(concat(variables('_solutionId'),'-','AnalyticsRule','-','27f1a570-5f20-496b-88f6-a9aa2c5c9534','-', '1.0.0')))]"
     },
+    "__analyticRulecontentProductId1": "[variables('analyticRuleObject1')._analyticRulecontentProductId1]",
     "analyticRuleObject2": {
       "analyticRuleVersion2": "1.0.0",
       "_analyticRulecontentId2": "3db9f99e-a459-41e0-8e02-8b332f5fcb2c",
       "analyticRuleId2": "[resourceId('Microsoft.SecurityInsights/AlertRuleTemplates', '3db9f99e-a459-41e0-8e02-8b332f5fcb2c')]",
       "analyticRuleTemplateSpecName2": "[concat(parameters('workspace'),'/Microsoft.SecurityInsights/',concat(parameters('workspace'),'-ar-',uniquestring('3db9f99e-a459-41e0-8e02-8b332f5fcb2c')))]",
-      "_analyticRulecontentProductId2": "[concat(take(variables('_solutionId'),50),'-','ar','-', uniqueString(concat(variables('_solutionId'),'-','AnalyticsRule','-','3db9f99e-a459-41e0-8e02-8b332f5fcb2c','-', '1.0.0')))]",
-      "__analyticRulecontentProductId2": "[variables('_analyticRulecontentProductId2')]"
+      "_analyticRulecontentProductId2": "[concat(take(variables('_solutionId'),50),'-','ar','-', uniqueString(concat(variables('_solutionId'),'-','AnalyticsRule','-','3db9f99e-a459-41e0-8e02-8b332f5fcb2c','-', '1.0.0')))]"
     },
+    "__analyticRulecontentProductId2": "[variables('analyticRuleObject2')._analyticRulecontentProductId2]",
     "huntingQueryObject1": {
       "huntingQueryVersion1": "1.0.0",
       "_huntingQuerycontentId1": "dedb8fb9-3caa-4b00-ae88-1898eed78917",

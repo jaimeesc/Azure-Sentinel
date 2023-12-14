@@ -16,7 +16,7 @@
     },
     "workspace-location": {
       "type": "string",
-      "defaultValue": "[concat('Region to deploy solution resources -- separate from location selection',parameters('location'))]",
+      "defaultValue": "",
       "metadata": {
         "description": "[concat('Region to deploy solution resources -- separate from location selection',parameters('location'))]"
       }
@@ -65,8 +65,8 @@
     "dataConnectorVersion2": "1.0.0",
     "_dataConnectorcontentProductId2": "[concat(take(variables('_solutionId'),50),'-','dc','-', uniqueString(concat(variables('_solutionId'),'-','DataConnector','-',variables('_dataConnectorContentId2'),'-', variables('dataConnectorVersion2'))))]",
     "__dataConnectorcontentProductId2": "[variables('_dataConnectorcontentProductId2')]",
-    "workbookVersion1": "",
-    "workbookContentId1": "",
+    "workbookVersion1": "1.0.0",
+    "workbookContentId1": "0e70c9db-d47f-4d69-af34-0b72a5736226",
     "workbookId1": "[resourceId('Microsoft.Insights/workbooks', variables('workbookContentId1'))]",
     "_workbookId1": "[variables('workbookId1')]",
     "workbookTemplateSpecName1": "[concat(parameters('workspace'),'/Microsoft.SecurityInsights/',concat(parameters('workspace'),'-wb-',uniquestring(variables('_workbookContentId1'))))]",
@@ -124,7 +124,7 @@
               "properties": {
                 "connectorUiConfig": {
                   "id": "[variables('_uiConfigId1')]",
-                  "title": "[Deprecated] SonicWall Firewall via Legacy Agent",
+                  "title": "(Deprecated) SonicWall Firewall via Legacy Agent",
                   "publisher": "SonicWall",
                   "descriptionMarkdown": "Common Event Format (CEF) is an industry standard format on top of Syslog messages, used by SonicWall to allow event interoperability among different platforms. By connecting your CEF logs to Microsoft Sentinel, you can take advantage of search & correlation, alerting, and threat intelligence enrichment for each log.",
                   "graphQueries": [
@@ -295,7 +295,7 @@
         "contentSchemaVersion": "3.0.0",
         "contentId": "[variables('_dataConnectorContentId1')]",
         "contentKind": "DataConnector",
-        "displayName": "[Deprecated] SonicWall Firewall via Legacy Agent",
+        "displayName": "(Deprecated) SonicWall Firewall via Legacy Agent",
         "contentProductId": "[variables('__dataConnectorcontentProductId1')]",
         "id": "[variables('__dataConnectorcontentProductId1')]",
         "version": "[variables('dataConnectorVersion1')]"
@@ -337,7 +337,7 @@
       "kind": "GenericUI",
       "properties": {
         "connectorUiConfig": {
-          "title": "[Deprecated] SonicWall Firewall via Legacy Agent",
+          "title": "(Deprecated) SonicWall Firewall via Legacy Agent",
           "publisher": "SonicWall",
           "descriptionMarkdown": "Common Event Format (CEF) is an industry standard format on top of Syslog messages, used by SonicWall to allow event interoperability among different platforms. By connecting your CEF logs to Microsoft Sentinel, you can take advantage of search & correlation, alerting, and threat intelligence enrichment for each log.",
           "graphQueries": [
@@ -485,7 +485,7 @@
               "properties": {
                 "connectorUiConfig": {
                   "id": "[variables('_uiConfigId2')]",
-                  "title": "[Recommended] SonicWall Firewall via AMA (using Azure Functions)",
+                  "title": "(Recommended) SonicWall Firewall via AMA (using Azure Functions)",
                   "publisher": "SonicWall",
                   "descriptionMarkdown": "Common Event Format (CEF) is an industry standard format on top of Syslog messages, used by SonicWall to allow event interoperability among different platforms. By connecting your CEF logs to Microsoft Sentinel, you can take advantage of search & correlation, alerting, and threat intelligence enrichment for each log.",
                   "graphQueries": [
@@ -650,7 +650,7 @@
         "contentSchemaVersion": "3.0.0",
         "contentId": "[variables('_dataConnectorContentId2')]",
         "contentKind": "DataConnector",
-        "displayName": "[Recommended] SonicWall Firewall via AMA (using Azure Functions)",
+        "displayName": "(Recommended) SonicWall Firewall via AMA (using Azure Functions)",
         "contentProductId": "[variables('__dataConnectorcontentProductId2')]",
         "id": "[variables('__dataConnectorcontentProductId2')]",
         "version": "[variables('dataConnectorVersion2')]"
@@ -692,7 +692,7 @@
       "kind": "GenericUI",
       "properties": {
         "connectorUiConfig": {
-          "title": "[Recommended] SonicWall Firewall via AMA (using Azure Functions)",
+          "title": "(Recommended) SonicWall Firewall via AMA (using Azure Functions)",
           "publisher": "SonicWall",
           "descriptionMarkdown": "Common Event Format (CEF) is an industry standard format on top of Syslog messages, used by SonicWall to allow event interoperability among different platforms. By connecting your CEF logs to Microsoft Sentinel, you can take advantage of search & correlation, alerting, and threat intelligence enrichment for each log.",
           "graphQueries": [
@@ -1036,8 +1036,8 @@
         "contentId": "[variables('analyticRuleObject1')._analyticRulecontentId1]",
         "contentKind": "AnalyticsRule",
         "displayName": "SonicWall - Allowed SSH, Telnet, and RDP Connections",
-        "contentProductId": "[variables('analyticRuleObject1').__analyticRulecontentProductId1]",
-        "id": "[variables('analyticRuleObject1').__analyticRulecontentProductId1]",
+        "contentProductId": "[variables('__analyticRulecontentProductId1')]",
+        "id": "[variables('__analyticRulecontentProductId1')]",
         "version": "[variables('analyticRuleObject1').analyticRuleVersion1]"
       }
     },
@@ -1180,8 +1180,8 @@
         "contentId": "[variables('analyticRuleObject2')._analyticRulecontentId2]",
         "contentKind": "AnalyticsRule",
         "displayName": "SonicWall - Capture ATP Malicious File Detection",
-        "contentProductId": "[variables('analyticRuleObject2').__analyticRulecontentProductId2]",
-        "id": "[variables('analyticRuleObject2').__analyticRulecontentProductId2]",
+        "contentProductId": "[variables('__analyticRulecontentProductId2')]",
+        "id": "[variables('__analyticRulecontentProductId2')]",
         "version": "[variables('analyticRuleObject2').analyticRuleVersion2]"
       }
     },

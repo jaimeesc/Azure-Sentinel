@@ -40,7 +40,6 @@ relevantTechniques:
   - T1041
   - T1011
   - T1567
-  - T1639
   - T1646
   - T1490
 query: |

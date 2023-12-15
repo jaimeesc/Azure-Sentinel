@@ -39,11 +39,6 @@ entityMappings:
     fieldMappings:
       - identifier: Name
         columnName: File
-  - entityType: FileHash
-    fieldMappings:
-      - algorithm: MD5
-      - identifier: Value
-        columnName: Hash
   - entityType: Url
     fieldMappings:
       - identifier: Url

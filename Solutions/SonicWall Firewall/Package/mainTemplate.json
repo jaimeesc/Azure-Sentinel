@@ -1347,9 +1347,6 @@
     }
   ],
   "outputs": {
-    "location" : {
-      "type": "string",
-      "value": "[parameters('workspace-location')]"
-    }
+    "location": "[parameters('workspace-location')]"
   }
 }

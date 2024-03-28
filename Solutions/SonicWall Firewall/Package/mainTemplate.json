@@ -1346,6 +1346,5 @@
       "name": "[concat(parameters('workspace'),'/Microsoft.SecurityInsights/', variables('_solutionId'))]"
     }
   ],
-  "outputs": {}
-  }
+  "outputs": {},
 }

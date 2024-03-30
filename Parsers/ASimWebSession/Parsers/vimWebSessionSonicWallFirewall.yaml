@@ -1,7 +1,7 @@
 Parser:
   Title: Web Session ASIM filtering parser for SonicWall firewalls
   Version: '0.1.0'
-  LastUpdated: Mar 26, 2024
+  LastUpdated: Mar 29, 2024
 Product:
   Name: SonicWall
 Normalization:
@@ -68,12 +68,21 @@ ParserQuery: |
       ];
       CommonSecurityLog
       | where not(disabled)
-      | where DeviceVendor == "SonicWall"
-      | where DeviceEventClassID in (14, 97)
-      | where (isnull(starttime) or TimeGenerated >= starttime) and (isnull(endtime) or TimeGenerated <= endtime)
-      | where (isnotempty(SourceIP) or isnotempty(DestinationIP))
-      | extend temp_SrcMatch = has_any_ipv4_prefix(SourceIP, src_or_any)
-        , temp_DstMatch = has_any_ipv4_prefix(DestinationIP, ipaddr_has_any_prefix)
+          and DeviceVendor == "SonicWall"
+          and DeviceEventClassID in (14, 97)
+          and (isnull(starttime) or TimeGenerated >= starttime) and (isnull(endtime) or TimeGenerated <= endtime)
+          and (array_length(httpuseragent_has_any) == 0 or RequestClientApplication has_any (httpuseragent_has_any))
+          and Protocol has_any(dynamic(["udp/http", "tcp/http", "udp/https", "tcp/https"]))
+          and (array_length(url_has_any) == 0 or RequestURL has_any (url_has_any) or AdditionalExtensions has_any (url_has_any))
+          and (array_length(eventresultdetails_in) == 0)
+      | parse-kv AdditionalExtensions as (['gcat']:string, ['app']:string, ['arg']:string, ['dstV6']:string, ['srcV6']:string, ['snpt']:string, ['dnpt']:string, ['susr']:string,['appName']:string, ['appcat']:string, ['appid']:string, ['sid']:string, ['catid']:string, ['ipscat']:string, ['ipspri']:string, ['spycat']:string, ['spypri']:string, ['fw_action']:string, ['dpi']:string, ['bid']:string, ['af_action']:string, ['af_polid']:string, ['af_policy']:string, ['af_type']:string, ['af_service']:string, ['af_object']:string, ['contentObject']:string, ['fileid']:string, ['uuid']:string) with (pair_delimiter=";", kv_delimiter="=")
+      | extend
+          SrcIpAddr = coalesce(SourceIP, srcV6)
+        , DstIpAddr = coalesce(DestinationIP, dstV6)
+      | where (isnotempty(SrcIpAddr) or isnotempty(DstIpAddr))
+          and isnotempty(fw_action)
+      | extend temp_SrcMatch = has_any_ipv4_prefix(SrcIpAddr, src_or_any)
+        , temp_DstMatch = has_any_ipv4_prefix(DstIpAddr, ipaddr_has_any_prefix)
       | extend ASimMatchingIpAddr = case(array_length(src_or_any) == 0, "-",
                                         temp_SrcMatch and temp_DstMatch, "Both",
                                         temp_SrcMatch, "SrcIpAddr",
@@ -81,24 +90,13 @@ ParserQuery: |
                                         "No match")
       | where ASimMatchingIpAddr != "No match"
       | project-away temp_*
-      | extend EventResultDetails = "NA"
-      | where (array_length(eventresultdetails_in) == 0 or tostring(EventResultDetails) has_any(eventresultdetails_in))
-      | where (array_length(httpuseragent_has_any) == 0 or RequestClientApplication has_any (httpuseragent_has_any))
-      | where Protocol has_any(dynamic(["udp/http", "tcp/http", "udp/https", "tcp/https"]))
-      | parse-kv AdditionalExtensions as (['gcat']:string, ['app']:string, ['arg']:string, ['dstV6']:string, ['srcV6']:string, ['snpt']:string, ['dnpt']:string, ['susr']:string,['appName']:string, ['appcat']:string, ['appid']:string, ['sid']:string, ['catid']:string, ['ipscat']:string, ['ipspri']:string, ['spycat']:string, ['spypri']:string, ['fw_action']:string, ['dpi']:string, ['bid']:string, ['af_action']:string, ['af_polid']:string, ['af_policy']:string, ['af_type']:string, ['af_service']:string, ['af_object']:string, ['contentObject']:string, ['fileid']:string, ['uuid']:string) with (pair_delimiter=";", kv_delimiter="=")
-      | extend
-          SrcIpAddr = coalesce(SourceIP, srcV6)
-        , DstIpAddr = coalesce(DestinationIP, dstV6)
       | extend RequestURL_ = extract(@"(?:[.*;]+?)(?P<url>[a-zA-Z0-9_*.,}{&%$~:;\-=\/?[:space:]]+)(?:;fw_action)", 1, AdditionalExtensions)
       | extend RequestURL_ = iif(RequestURL_ startswith "snpt" or RequestURL_ startswith "dnpt" or RequestURL_ startswith "appid" or RequestURL_ startswith "appName", extract(@"(?:\d;|.{1}\w.{1};)(?P<url>[a-zA-Z0-9_*.,}{&%$~:;\-=\/?[:space:]]+)", 1, RequestURL_), RequestURL_)
       | extend RequestURL_ = iif(RequestURL_ matches regex @"^(.{2,6}=.{1,6})", extract(@"(?:\d;|.{1}\w.{1};)(?P<url>[a-zA-Z0-9_*.,}{&%$~:;\-=\/?[:space:]]+)", 1, RequestURL_), iif(RequestURL_ matches regex @"^\w=\d$", "", RequestURL_))
       | extend RequestURL_ = iif(RequestURL_ has_any(dynamic(["af_polid=", "ipscat=", "snpt=", "dnpt="])), "", RequestURL_)
       | extend RequestURL = iif(isnotempty(RequestURL), RequestURL, iif(RequestURL_ contains "/" and RequestURL_ contains ".", RequestURL_, ""))
       | where isnotempty(RequestURL)
-      | where (array_length(url_has_any) == 0 or RequestURL has_any (url_has_any))
-      | where isnotempty(fw_action)
       | lookup Actions on fw_action
-      // Sets the mandatory EventResult based on the DvcAction.
       | extend EventResult = case(DvcAction == "Allow", "Success",
             DvcAction == "Management", "NA",
             DvcAction == "NA", "NA",
@@ -263,7 +261,8 @@ ParserQuery: |
   | extend
       UrlCategory = sosCFSCategoryName
       , HttpRequestMethod = coalesce(HttpRequestMethod, sosHttpRequestMethod_)
-      , HttpStatusCode = EventResultDetails
+      , EventResultDetails = ""
+      , HttpStatusCode = ""
       , SrcUsername = coalesce(susr, SrcUsername)
       , FileName = coalesce(FileName, sosAppControlFileName)
       , NetworkDirection = case(SrcZone == "" and DstZone == "", "NA"

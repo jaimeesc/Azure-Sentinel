@@ -1,7 +1,7 @@
 Parser:
   Title: Web Session ASIM parser for SonicWall firewalls
   Version: '0.1.0'
-  LastUpdated: Mar 26, 2024
+  LastUpdated: Mar 29, 2024
 Product:
   Name: SonicWall
 Normalization:
@@ -32,23 +32,22 @@ ParserQuery: |
       ];
       CommonSecurityLog
       | where not(disabled)
-      | where DeviceVendor == "SonicWall"
-      | where DeviceEventClassID in (14, 97)
-      | where Protocol has_any(dynamic(["udp/http", "tcp/http", "udp/https", "tcp/https"]))
+          and DeviceVendor == "SonicWall"
+          and DeviceEventClassID in (14, 97)
+          and Protocol has_any(dynamic(["udp/http", "tcp/http", "udp/https", "tcp/https"]))
       | parse-kv AdditionalExtensions as (['gcat']:string, ['app']:string, ['arg']:string, ['dstV6']:string, ['srcV6']:string, ['snpt']:string, ['dnpt']:string, ['susr']:string,['appName']:string, ['appcat']:string, ['appid']:string, ['sid']:string, ['catid']:string, ['ipscat']:string, ['ipspri']:string, ['spycat']:string, ['spypri']:string, ['fw_action']:string, ['dpi']:string, ['bid']:string, ['af_action']:string, ['af_polid']:string, ['af_policy']:string, ['af_type']:string, ['af_service']:string, ['af_object']:string, ['contentObject']:string, ['fileid']:string, ['uuid']:string) with (pair_delimiter=";", kv_delimiter="=")
       | extend
         SrcIpAddr = coalesce(SourceIP, srcV6)
         , DstIpAddr = coalesce(DestinationIP, dstV6)
       | where (isnotempty(SrcIpAddr) or isnotempty(DstIpAddr))
+          and isnotempty(fw_action)
       | extend RequestURL_ = extract(@"(?:[.*;]+?)(?P<url>[a-zA-Z0-9_*.,}{&%$~:;\-=\/?[:space:]]+)(?:;fw_action)", 1, AdditionalExtensions)
       | extend RequestURL_ = iif(RequestURL_ startswith "snpt" or RequestURL_ startswith "dnpt" or RequestURL_ startswith "appid" or RequestURL_ startswith "appName", extract(@"(?:\d;|.{1}\w.{1};)(?P<url>[a-zA-Z0-9_*.,}{&%$~:;\-=\/?[:space:]]+)", 1, RequestURL_), RequestURL_)
       | extend RequestURL_ = iif(RequestURL_ matches regex @"^(.{2,6}=.{1,6})", extract(@"(?:\d;|.{1}\w.{1};)(?P<url>[a-zA-Z0-9_*.,}{&%$~:;\-=\/?[:space:]]+)", 1, RequestURL_), iif(RequestURL_ matches regex @"^\w=\d$", "", RequestURL_))
       | extend RequestURL_ = iif(RequestURL_ has_any(dynamic(["af_polid=", "ipscat=", "snpt=", "dnpt="])), "", RequestURL_)
       | extend RequestURL = iif(isnotempty(RequestURL), RequestURL, iif(RequestURL_ contains "/" and RequestURL_ contains ".", RequestURL_, ""))
       | where isnotempty(RequestURL)
-      | where isnotempty(fw_action)
       | lookup Actions on fw_action
-      // Sets the mandatory EventResult based on the DvcAction.
       | extend EventResult = case(DvcAction == "Allow", "Success",
             DvcAction == "Management", "NA",
             DvcAction == "NA", "NA",
@@ -207,7 +206,7 @@ ParserQuery: |
       , EventSchema = "WebSession"
       , EventCount = toint(1)
       , EventUid = _ItemId
-      , EventResultDetails = "NA"
+      , EventResultDetails = ""
       , ASimMatchingIpAddr = "-"
       , UserAgent = HttpUserAgent
       , ThreatConfidence = coalesce(toint(ThreatOriginalConfidence), int(null))
